@@ -1,0 +1,198 @@
+[
+ {
+  "role": "exchange",
+  "source_bundle": "39e87e2bec26a9fa666d758edac323ebdf8ce227a02e15b8a34b274eb09518f5",
+  "file": "glm53_baseline/arm_slots.cu",
+  "sha256": "2e04913878bcf1a94cae49f47406b22672827d5619b8bc84221b625a4939a2bf",
+  "lines": 36,
+  "original_file": "kernels/arm_slots.cu"
+ },
+ {
+  "role": "exchange",
+  "source_bundle": "39e87e2bec26a9fa666d758edac323ebdf8ce227a02e15b8a34b274eb09518f5",
+  "file": "glm53_baseline/exchange.py",
+  "sha256": "a52ff5116bf5ab92c51449cc8510cdda2c5c9f7002040c9224e1e6b3fa5f6649",
+  "lines": 617,
+  "original_file": "kernels/exchange.py"
+ },
+ {
+  "role": "projection",
+  "source_bundle": "58d3402ec2983aa58bb699fd257c47638eef207c2284d4f84c7c0378c1ac1357",
+  "file": "glm53_baseline/dpo.py",
+  "sha256": "c3fa1bca7ceb7aaef4eb1888e71e79d878160a15cdf78d0d2a67345a7ba3000f",
+  "lines": 219,
+  "original_file": "kernels/dpo.py",
+  "modified": true,
+  "change": "u2: the fused projection path serves up to 64 local rows (MTP verify at the 8k cell): RMAX 64, a GEMM M-tile grid axis with 6 K-splits past 128 gathered rows, a two-rows-per-block merge past 128; the original kernels are unchanged at and below 128 gathered rows"
+ },
+ {
+  "role": "projection",
+  "source_bundle": "58d3402ec2983aa58bb699fd257c47638eef207c2284d4f84c7c0378c1ac1357",
+  "file": "glm53_baseline/dpo_native.cu",
+  "sha256": "263b321168d2647f72391e732908c64e93eb1eaa9e2cfe1c9d257aaf23ab454d",
+  "lines": 738,
+  "original_file": "kernels/dpo_native.cu",
+  "modified": true,
+  "change": "u2: the fused projection path serves up to 64 local rows (MTP verify at the 8k cell): RMAX 64, a GEMM M-tile grid axis with 6 K-splits past 128 gathered rows, a two-rows-per-block merge past 128; the original kernels are unchanged at and below 128 gathered rows"
+ },
+ {
+  "role": "moe",
+  "source_bundle": "63083f9e661b319dc533f613502882f139e35b794560d8fb63afe20c4fce5597",
+  "file": "glm53_baseline/moe_routed_experts.py",
+  "sha256": "500202852598118bf20fd805e954cc696f54f7d5115af57ccb0c489808177ade",
+  "lines": 622,
+  "original_file": "kernels/moe_routed_experts.py",
+  "modified": true,
+  "original_sha256": "d79ca0e5909a3ccea4ed392c4280ed113759573e56cce7619265076782c5fa0c",
+  "change": "the crowned kernel path is unchanged; adds decode_deferred/_finalize_shared so the layer owns the shared-expert join, moves the pins to 0.5.20/0.6.18 and carries FlashInfer 0.6.18's four added raw-op arguments; u1: the validated FlashInfer runtime is resolved once per process instead of once per layer prepare"
+ },
+ {
+  "role": "norm",
+  "source_bundle": "5cbb4a580214b04139f97019d1b609b6c98e4f88d8f8933949859d2a1427383c",
+  "file": "glm53_baseline/fused_add_rmsnorm.py",
+  "sha256": "8c5f2a56eb177d0f59d1d14a6f2445b91803dba4776f847a5c20ffe85011b288",
+  "lines": 110,
+  "original_file": "kernels/fused_add_rmsnorm.py"
+ },
+ {
+  "role": "candidate",
+  "source_bundle": null,
+  "file": "glm53_baseline/fused_tail.py",
+  "note": "this bundle's own: the finalize, the shared-expert add and the layer's reduce-scatter in one kernel; the Lamport wire protocol is the exchange crown's, constant for constant",
+  "sha256": "210c71c03853c4a0af6c4ac9fa635ae9e4144db84b468a8476af340fe301e0e4",
+  "lines": 581,
+  "modified": true,
+  "change": "u4: adds _tail_norm_kernel (the tail kernel verbatim through the poll, then the next layer's opening residual add + RMSNorm) and its launcher; the original kernel is unchanged; u7: the tail+norm launcher falls back to a plain launch when PDL is refused; u9: the tail+norm kernel also stores the tail output (stock-shaped return)"
+ },
+ {
+  "role": "candidate",
+  "source_bundle": null,
+  "file": "glm53_baseline/prefill_tail.py",
+  "note": "this bundle's own: the prefill MoE tail (finalize, reduce-scatter, shared add) as a push into the owners' symmetric slots plus an owner-side sum; u4: _reduce_norm_kernel adds the next layer's opening norm to the owner reduce; u5: _push_rows_kernel (SM-partitioned push) and push()/reduce() for co-scheduling; u6: takes the native push when every rank can load it; u9: the reduce+norm kernel also stores the layer output",
+  "sha256": "e7a09c42abc22887f794b6b41ca930465fa64f673e59c379a7725d545f094481",
+  "lines": 417
+ },
+ {
+  "role": "candidate",
+  "source_bundle": null,
+  "file": "glm53_baseline/handoff.py",
+  "note": "this bundle's own: the cross-layer hand-off, audit-safe -- keyed by the returned (output, residual) pair",
+  "sha256": "e39d01bbcf25db8cf91f442245575e549379be5ee3cf52357d4bf54abf08a4f1",
+  "lines": 78
+ },
+ {
+  "role": "candidate",
+  "source_bundle": null,
+  "file": "glm53_baseline/prefill_push.cu",
+  "note": "this bundle's own: the prefill push in CUDA/PTX (TMA bulk-copy gather ring, warp-specialized)",
+  "sha256": "cd6504f4277a95dd64ff684c1114b66065b1b7e580de770bec813023752688b8",
+  "lines": 261
+ },
+ {
+  "role": "candidate",
+  "source_bundle": null,
+  "file": "glm53_baseline/levers.py",
+  "note": "this bundle's own: one table of every switch layered on v14",
+  "sha256": "59f2134d9cb3e78c893a247a8a12f5bd98b26f0f6b5e859a3ed8b18d65c389bd",
+  "lines": 35
+ },
+ {
+  "role": "base",
+  "source_bundle": "glm53-mtp-u9 (candidates/forward_pass.glm53/rivals/glm53_mtp_u9, content hash eb571747e564...)",
+  "note": "every file not listed below is u9's, byte for byte"
+ },
+ {
+  "role": "candidate",
+  "file": "glm53_baseline/qabsorb.py",
+  "source_bundle": "claude-unscored-glm-champion-fp4-v17 (fd3d27a1...)",
+  "note": "born-fp8 absorbed q at prefill"
+ },
+ {
+  "role": "candidate",
+  "file": "glm53_baseline/fp4_layer.py",
+  "modified": true,
+  "change": "u9's file + private attention copy with qabsorb.install and the local dense-layer mode from v17"
+ },
+ {
+  "role": "exchange",
+  "file": "glm53_baseline/exchange.py",
+  "sha256_prefix": "cf67f1d5",
+  "change": "the owner's barrier-fixed exchange (commit 1630751) in place of u9's pre-fix a52ff511"
+ },
+ {
+  "role": "candidate",
+  "file": "glm53_baseline/qabsorb.py",
+  "modified": true,
+  "change": "v20: indexer side-stream overlap with q_b and the born-fp8 kernels (bit-identical); v21: that indexer call's prefill top-k served by sglang's v2 ragged kernel (sglang.kernels.ops.attention.dsv4.topk) + a Triton page-table gather, same top-k set per row"
+ },
+ {
+  "role": "candidate",
+  "file": "glm53_baseline/oproj.py",
+  "change": "v26 (from v25): o_proj on a per-rank, live-selected cuBLASLt heuristic at the 4096-row prefill chunk; v27: heuristic #5 on every rank unless not row-exact or < 0.95x stock (DP ranks run in lockstep)"
+ },
+ {
+  "role": "candidate",
+  "file": "glm53_baseline/oproj_lt.cu",
+  "change": "v26 (from v25): cuBLASLt heuristics + matmul for row-major x(M,K) . w(N,K)^T, built by the rebuild step"
+ },
+ {
+  "role": "candidate",
+  "file": "glm53_baseline/qabsorb.py",
+  "modified": true,
+  "change": "v28: the armed prefill core also swaps flashinfer.decode.trtllm_batch_decode_with_kv_cache_mla for lite_attn.attention and hands it the call's topk_indices"
+ },
+ {
+  "role": "candidate",
+  "source_bundle": null,
+  "file": "glm53_baseline/lite_attn.py",
+  "note": "this bundle's own: prefill sparse MLA through LiteDSA token pairs, the pair union kept per indexer top-k"
+ },
+ {
+  "role": "candidate",
+  "source_bundle": null,
+  "file": "glm53_baseline/litedsa_native.cu",
+  "note": "this bundle's own: the pair-union kernel (physical slots, hash sets in shared memory) and torch bindings for the LiteDSA kernel"
+ },
+ {
+  "role": "vendored",
+  "file": "glm53_baseline/litedsa_attention_sm100.cuh",
+  "source": "LiteTopK (github.com/Heisenberg-Yin/LiteTopK, kernels/b200/dsa, Apache-2.0; arXiv 2607.11976), itself amalgamated from DeepSeek FlashMLA commit 9241ae3e (MIT)",
+  "change": "its cute/cutlass #include lines point at the flat cute_vendor/ names; code unchanged"
+ },
+ {
+  "role": "vendored",
+  "file": "glm53_baseline/cute_vendor/*.cuh",
+  "source": "NVIDIA CUTLASS / CuTe headers as shipped in flashinfer-python 0.6.18 (data/cutlass/include), BSD-3-Clause, license header kept in every file",
+  "change": "flat names (path separators -> '__', '.' -> '_', suffix .cuh) and #include lines rewritten to them (scripts_box/litedsa/vendor_cute.py); code unchanged"
+ },
+ {
+  "role": "candidate",
+  "file": "glm53_baseline/oproj.py",
+  "modified": true,
+  "change": "v34 (from v31): eligible prefill o_proj calls run in FP8 e4m3; oproj_lt.cu removed"
+ },
+ {
+  "role": "vendored",
+  "file": "glm53_baseline/cute_vendor/*.cuh",
+  "modified": true,
+  "change": "2026-09-25 intake fix: `#include CUDA_STD_HEADER(x)` -> `#include <cuda/std/x>`"
+ },
+ {
+  "role": "candidate",
+  "source_bundle": null,
+  "file": "glm53_baseline/fp8w.py",
+  "note": "v45 (from v43): replaces oproj.py -- e4m3 prefill o_proj (4096 rows) and q_b (>= 128 rows), rowwise FP8 GEMM"
+ },
+ {
+  "role": "candidate",
+  "file": "glm53_baseline/litedsa_native.cu",
+  "modified": true,
+  "change": "v45 (from v36): the pair union with two 8192-slot shared-memory hash sets, bit-identical"
+ },
+ {
+  "role": "candidate",
+  "file": "glm53_baseline/fp4_layer.py",
+  "modified": true,
+  "change": "v45: fp8w.install_q_b + fp8w.install_o_proj in place of oproj.install"
+ }
+]
